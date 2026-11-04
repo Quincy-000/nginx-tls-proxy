@@ -2,14 +2,26 @@ services:
   app:
     build: ./app
     networks: [proxynet]
-    ports:
-      - "8000:8000"   # TEMPORARY (step 1 only); removed in step 2
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz', timeout=2)"]
       interval: 10s
       timeout: 3s
       retries: 3
       start_period: 5s
+
+  nginx:
+    image: nginx:1.27.2
+    networks: [proxynet]
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/entrypoint/10-check-cert.sh:/docker-entrypoint.d/10-check-cert.sh:ro
+    depends_on:
+      app:
+        condition: service_healthy
 
 networks:
   proxynet:
