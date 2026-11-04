@@ -1,0 +1,3 @@
+nginx/certs/server.crt
+nginx/certs/server.key
+__pycache__/
